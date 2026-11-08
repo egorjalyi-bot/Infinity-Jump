@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Бесконечные прыжки V9.1</title>
+<title>Бесконечные прыжки V10.1</title>
 <style>
   html, body { margin: 0; height: 100%; background: #0c1632; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; color: #fff; touch-action: none; user-select: none; -webkit-user-select: none; }
   canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
@@ -21,13 +21,31 @@
   #jumpBtn, #flyBtn { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); border: 0; border-radius: 50%; color: #fff; font-weight: 700; display: none; background: rgba(160,220,255,.35); backdrop-filter: blur(4px); }
   #jumpBtn { right: 22px; width: 96px; height: 96px; font-size: 16px; }
   #flyBtn { right: 132px; width: 80px; height: 80px; font-size: 12px; background: rgba(255,233,168,.35); }
-  body.touch #jumpBtn { display: block; }
-  body.touch.wings #flyBtn { display: block; }
+  body.touch.play #jumpBtn { display: block; }
+  body.touch.play.wings #flyBtn { display: block; }
+  #camPad { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); display: none; grid-template-columns: repeat(3, 46px); gap: 6px; }
+  body.touch.play #camPad { display: grid; }
+  #camPad button { width: 46px; height: 46px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2); background: rgba(20,30,60,.6); color: #fff; font-size: 18px; padding: 0; backdrop-filter: blur(4px); }
+  #camPad button:active { background: rgba(124,196,245,.55); }
 
   .panel { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; touch-action: pan-y; -webkit-overflow-scrolling: touch; background: radial-gradient(ellipse at 50% 20%, rgba(50,90,150,.75), rgba(6,10,28,.94)); padding: 20px; box-sizing: border-box; text-align: center; overflow: auto; }
   .panel.hidden { display: none; }
   .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 16px 20px; box-shadow: 0 10px 40px rgba(0,0,0,.35); max-width: min(92vw, 420px); box-sizing: border-box; }
   .menucard > .btn.sec { width: 100%; margin: 4px 0; }
+  .grid2 .wide { grid-column: span 2; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opt { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.07); color: #fff; border-radius: 10px; padding: 7px 10px; font-size: 13px; cursor: pointer; }
+  .opt.on { background: #7cc4f5; color: #03182e; border-color: transparent; font-weight: 700; }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 6px 0 10px; }
+  .day { background: rgba(255,255,255,.07); border-radius: 10px; padding: 6px 2px; font-size: 10px; text-align: center; border: 1px solid transparent; }
+  .day b { display: block; font-size: 14px; margin-top: 3px; }
+  .day.now { border-color: #ffd34d; background: rgba(255,211,77,.15); }
+  .day.done { opacity: .45; }
+  .bar { height: 6px; background: rgba(255,255,255,.15); border-radius: 3px; margin: 5px 0 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: #7cc4f5; }
+  .bar.full i { background: #ffd34d; }
+  #rewardsBody { max-height: 46vh; overflow: auto; text-align: left; }
+  #creatorBody { max-height: 30vh; overflow: auto; text-align: left; }
   .big { font-size: 52px; font-weight: 800; margin: 4px 0 10px; text-shadow: 0 0 18px #6cc4ff; }
   .tabs { display: flex; gap: 6px; width: 100%; margin-bottom: 8px; }
   .tab { flex: 1; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.07); color: #fff; border-radius: 12px; padding: 9px 6px; font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -115,10 +133,18 @@
 <div id="stick"><div id="knob"></div></div>
 <button id="jumpBtn">ПРЫЖОК</button>
 <button id="flyBtn">СПОСОБ-<br>НОСТЬ</button>
+<div id="camPad">
+  <button data-pad="yaw:-1" aria-label="Повернуть влево">◀</button>
+  <button data-pad="pitch:-1" aria-label="Камера вверх">▲</button>
+  <button data-pad="yaw:1" aria-label="Повернуть вправо">▶</button>
+  <button id="padView" aria-label="Вид от первого лица">👁</button>
+  <button data-pad="pitch:1" aria-label="Камера вниз">▼</button>
+  <button id="padPause" aria-label="Пауза">⏸</button>
+</div>
 <div id="hint"></div>
 
 <div id="register" class="panel hidden">
-  <h1>Бесконечные прыжки <small class="gver">V9.1</small></h1>
+  <h1>Бесконечные прыжки <small class="gver">V10.1</small></h1>
   <div class="card menucard">
     <h2>Создайте аккаунт</h2>
     <p>Монеты, предметы и рекорды сохраняются в аккаунте. Аккаунты хранятся в этом браузере.</p>
@@ -133,7 +159,7 @@
 </div>
 
 <div id="login" class="panel hidden">
-  <h1>Бесконечные прыжки <small class="gver">V9.1</small></h1>
+  <h1>Бесконечные прыжки <small class="gver">V10.1</small></h1>
   <div class="card menucard">
     <h2>Вход в аккаунт</h2>
     <input id="logName" class="field" placeholder="Имя" maxlength="16" autocomplete="username">
@@ -146,7 +172,7 @@
 </div>
 
 <div id="menu" class="panel sheet hidden">
-  <h1>Бесконечные прыжки <small class="gver">V9.1</small></h1>
+  <h1>Бесконечные прыжки <small class="gver">V10.1</small></h1>
   <div class="card menucard">
     <div class="acc" id="acc"></div>
     <div class="chips" id="menuStats"></div>
@@ -156,6 +182,7 @@
       <button class="btn sec" data-act="custom">🎨 Образ</button>
       <button class="btn sec" data-act="notes">🔔 Новости<span id="notesBadge" class="badge"></span></button>
       <button class="btn sec" data-act="settings">⚙ Настройки</button>
+      <button class="btn sec wide" data-act="rewards">🏆 Награды<span id="rewBadge" class="badge"></span></button>
     </div>
     <button class="btn link" data-act="logout">Сменить аккаунт</button>
   </div>
@@ -200,6 +227,14 @@
     <button class="btn" data-act="backupCopy">Скопировать</button>
     <button class="btn" data-act="backupImport">Загрузить из кода</button>
     <button class="btn" data-act="backupBack">Назад</button>
+  </div>
+</div>
+
+<div id="rewards" class="panel hidden">
+  <div class="card menucard">
+    <h2>Награды</h2>
+    <div id="rewardsBody"></div>
+    <button class="btn sec" data-act="back">Назад</button>
   </div>
 </div>
 
@@ -252,7 +287,7 @@ const STICK_R = 60;
 const CELL = 4.2, PLAT = 3.0, RISE = 1.5;
 const SNOW_N = 900;
 const BIOME_LEN = 15;
-const GAME_VERSION = 'V9.1';
+const GAME_VERSION = 'V10.1';
 const GAME_NAME = 'Бесконечные прыжки';
 const SAVE_KEY = 'gjump3d_v6';
 
@@ -307,7 +342,7 @@ let owned = [];
 let equipped = { hat: null, face: null, back: null, neck: null };
 const REMOVED_ACC = { guitar: 30, cape: 28, monocle: 20, mustache: 8 };
 const SET_KEY = 'gjump3d_settings_v1';
-const DEFAULT_SETTINGS = { wing: 1.7, volume: 50, camDist: 9.5, snow: 100, shadows: true, hints: true };
+const DEFAULT_SETTINGS = { wing: 1.7, volume: 50, camDist: 9.5, snow: 100, shadows: true, hints: true, touchUi: null };
 let settings = Object.assign({}, DEFAULT_SETTINGS);
 const SET_DEFS = [
   { k: 'wing',    name: 'Размер крыльев',       min: 1, max: 2.5, step: 0.1, fmt: v => '×' + Number(v).toFixed(1) },
@@ -315,7 +350,8 @@ const SET_DEFS = [
   { k: 'camDist', name: 'Дистанция камеры',    min: 6, max: 14,  step: 0.5, fmt: v => v + ' м' },
   { k: 'snow',    name: 'Количество снега',    min: 0, max: 100, step: 10,  fmt: v => v + '%' },
   { k: 'shadows', name: 'Тени', bool: true },
-  { k: 'hints',   name: 'Подсказки управления', bool: true }
+  { k: 'hints',   name: 'Подсказки управления', bool: true },
+  { k: 'touchUi', name: 'Экранные кнопки (телефон)', bool: true }
 ];
 function loadSettings() {
   try {
@@ -335,6 +371,7 @@ function applySettings() {
   sun.castShadow = !!settings.shadows;
   snowGeo.setDrawRange(0, Math.floor(SNOW_N * settings.snow / 100));
   hintEl.style.display = settings.hints ? '' : 'none';
+  document.body.classList.toggle('touch', touchOn());
 }
 function renderSettings() {
   const el = document.getElementById('settingsBody');
@@ -342,7 +379,7 @@ function renderSettings() {
   let h = '<h2 style="text-align:center;margin:0 0 6px">Настройки</h2>';
   for (const d of SET_DEFS) {
     if (d.bool) {
-      h += `<label class="srow"><span>${d.name}</span><input type="checkbox" data-set="${d.k}"${settings[d.k] ? ' checked' : ''}></label>`;
+      h += `<label class="srow"><span>${d.name}</span><input type="checkbox" data-set="${d.k}"${(d.k === 'touchUi' ? touchOn() : settings[d.k]) ? ' checked' : ''}></label>`;
     } else {
       h += `<div class="srow col"><span>${d.name}: <b id="lbl-${d.k}">${d.fmt(settings[d.k])}</b></span><input type="range" min="${d.min}" max="${d.max}" step="${d.step}" value="${settings[d.k]}" data-set="${d.k}"></div>`;
     }
@@ -350,15 +387,18 @@ function renderSettings() {
   h += '<div style="text-align:center;margin-top:8px"><button class="btn small" data-act="backup">Резервная копия</button> <button class="btn small" data-act="settingsReset">Сбросить настройки</button></div>';
   el.innerHTML = h;
 }
-const DEFAULT_COLORS = { shirt: '#4ab8ff', pants: '#223355', skin: '#ffd7a8' };
+const DEFAULT_COLORS = { shirt: '#4ab8ff', pants: '#223355', skin: '#ffd7a8', hair: '#4a2f1b' };
+const HAIR_STYLES = [['none', 'Нет'], ['short', 'Короткая'], ['long', 'Длинная'], ['mohawk', 'Ирокез'], ['pony', 'Хвост'], ['bun', 'Пучок']];
 let colors = Object.assign({}, DEFAULT_COLORS);
 let created = false;
+let hairStyle = 'short';
+let daily = { last: '', streak: 0 }, ach = {}, stats = { runs: 0, coins: 0 };
 
 function save() {
   if (!account) return;
   const k = db.current;
   if (!k || !db.users[k]) return;
-  db.users[k].data = { bank, best, upg, owned, equipped, colors, created };
+  db.users[k].data = { bank, best, upg, owned, equipped, colors, created, hairStyle, daily, ach, stats };
   writeDb();
 }
 let db = { users: {}, current: null };
@@ -374,6 +414,8 @@ function resetProgress() {
   equipped = { hat: null, face: null, back: null, neck: null };
   colors = Object.assign({}, DEFAULT_COLORS);
   created = false;
+  hairStyle = 'short';
+  daily = { last: '', streak: 0 }; ach = {}; stats = { runs: 0, coins: 0 };
 }
 function applyUser(k) {
   const u = db.users[k];
@@ -388,6 +430,11 @@ function applyUser(k) {
   equipped = Object.assign({ hat: null, face: null, back: null, neck: null }, d.equipped || {});
   colors = Object.assign({}, DEFAULT_COLORS, d.colors || {});
   created = d.created !== undefined ? !!d.created : ((d.best || 0) > 0 || (d.bank || 0) > 0 || (Array.isArray(d.owned) && d.owned.length > 0));
+  hairStyle = HAIR_STYLES.some(h => h[0] === d.hairStyle) ? d.hairStyle : 'short';
+  daily = (d.daily && typeof d.daily.last === 'string') ? { last: d.daily.last, streak: Math.max(0, Math.floor(Number(d.daily.streak) || 0)) } : { last: '', streak: 0 };
+  ach = {};
+  if (d.ach && typeof d.ach === 'object') for (const a of ACH) if (d.ach[a.id] === 1 || d.ach[a.id] === 2) ach[a.id] = d.ach[a.id];
+  stats = { runs: Math.max(0, Math.floor(Number(d.stats && d.stats.runs) || 0)), coins: Math.max(0, Math.floor(Number(d.stats && d.stats.coins) || 0)) };
   let changed = false;
   for (const id of Object.keys(REMOVED_ACC)) {
     if (owned.includes(id)) { owned = owned.filter(x => x !== id); bank += REMOVED_ACC[id]; changed = true; }
@@ -530,7 +577,7 @@ resize();
 
 // ---------- biomes ----------
 const BIOMES = [
-  { name: 'Заснеженный лес',  sky: 0x0d1d33, fogN: 26, fogF: 80, light: 0xe2ecff, snow: 1.0,  wind: 0.5,  aurora: false, deco: 'trees',    plat: 0x9cb4c8, cap: 0xf6fbff, edge: 0xdff3ff },
+  { name: 'Заснеженный лес',  sky: 0x0d1d33, fogN: 26, fogF: 80, light: 0xe2ecff, snow: 1.0,  wind: 0.5,  aurora: true, deco: 'trees',    plat: 0x9cb4c8, cap: 0xf6fbff, edge: 0xdff3ff },
   { name: 'Ледяные пещеры',   sky: 0x061a33, fogN: 16, fogF: 58, light: 0x9fe6ff, snow: 0.45, wind: 0.1,  aurora: false, deco: 'crystals', plat: 0x4fa6d6, cap: 0xd6f5ff, edge: 0x9fe6ff },
   { name: 'Полярное сияние',  sky: 0x040a22, fogN: 30, fogF: 95, light: 0xb9ffe2, snow: 0.8,  wind: 0.35, aurora: true,  deco: 'trees',    plat: 0x6a78aa, cap: 0xf0f5ff, edge: 0xb9ffe2 },
   { name: 'Метель',           sky: 0x222a38, fogN: 10, fogF: 44, light: 0xd7deea, snow: 2.4,  wind: 1.8,  aurora: false, deco: 'rocks',    plat: 0x8a95a6, cap: 0xffffff, edge: 0xffffff }
@@ -550,9 +597,23 @@ const DECO_MATS = {
   rock: new T.MeshStandardMaterial({ color: 0x5f6b7c, roughness: 0.9 }),
   island: new T.MeshStandardMaterial({ color: 0x3d4a5e, roughness: 0.9 })
 };
+function auroraTex() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 64;
+  const g = c.getContext('2d');
+  const v = g.createLinearGradient(0, 0, 0, 64);
+  v.addColorStop(0, 'rgba(255,255,255,0)'); v.addColorStop(0.55, 'rgba(255,255,255,0.9)'); v.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = v; g.fillRect(0, 0, 256, 64);
+  g.globalCompositeOperation = 'destination-in';
+  const h = g.createLinearGradient(0, 0, 256, 0);
+  h.addColorStop(0, 'rgba(0,0,0,0)'); h.addColorStop(0.25, 'rgba(0,0,0,1)'); h.addColorStop(0.75, 'rgba(0,0,0,1)'); h.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = h; g.fillRect(0, 0, 256, 64);
+  return new T.CanvasTexture(c);
+}
+const aTex = auroraTex();
 const auroras = [];
 for (let i = 0; i < 3; i++) {
-  const mat = new T.MeshBasicMaterial({ color: 0x66ffaa, transparent: true, opacity: 0, side: T.DoubleSide, depthWrite: false, blending: T.AdditiveBlending });
+  const mat = new T.MeshBasicMaterial({ map: aTex, color: [0x66ffaa, 0x66d9ff, 0x9a8cff][i], transparent: true, opacity: 0, side: T.DoubleSide, depthWrite: false, blending: T.AdditiveBlending });
   const m = new T.Mesh(new T.PlaneGeometry(90, 24), mat);
   scene.add(m);
   auroras.push(m);
@@ -597,6 +658,23 @@ snowGeo.setAttribute('position', new T.BufferAttribute(snowPos, 3));
 const snow = new T.Points(snowGeo, new T.PointsMaterial({ size: 0.3, map: glowTex(), transparent: true, opacity: 0.95, depthWrite: false }));
 snow.frustumCulled = false;
 scene.add(snow);
+const moon = new T.Sprite(new T.SpriteMaterial({ map: glowTex(), color: 0xfff4d6, transparent: true, opacity: 0.9, depthWrite: false, fog: false }));
+moon.scale.set(16, 16, 1);
+scene.add(moon);
+const mountains = new T.Group();
+{
+  const mBody = new T.MeshBasicMaterial({ color: 0x1b3156, fog: false }), mCap = new T.MeshBasicMaterial({ color: 0xcfe3ff, fog: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  for (let i = 0; i < 16; i++) {
+    const h = rnd(40, 90), r = h * rnd(0.55, 0.8), x = -170 + i * 22 + rnd(-6, 6), z = rnd(-10, 10);
+    const m = new T.Mesh(new T.ConeGeometry(r, h, 7), mBody);
+    m.position.set(x, h / 2, z);
+    const cp = new T.Mesh(new T.ConeGeometry(r * 0.28, h * 0.28, 7), mCap);
+    cp.position.set(x, h * 0.86, z);
+    cp.scale.setScalar(1.04);
+    mountains.add(m, cp);
+  }
+}
+scene.add(mountains);
 let snowRate = 1, windNow = 0.5;
 
 // ---------- hero ----------
@@ -609,6 +687,7 @@ const matPants = new T.MeshStandardMaterial({ color: 0x223355, roughness: 0.7 })
 const matSkin = new T.MeshStandardMaterial({ color: 0xffd7a8, roughness: 0.6 });
 const matShoe = new T.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
 const matEye = new T.MeshBasicMaterial({ color: 0x111111 });
+const matHair = new T.MeshStandardMaterial({ color: 0x4a2f1b, roughness: 0.9 });
 const torso = new T.Mesh(new T.BoxGeometry(0.55, 0.7, 0.34), matShirt);
 torso.position.y = 0.36; torso.castShadow = true;
 const head = new T.Mesh(new T.SphereGeometry(0.24, 16, 12), matSkin);
@@ -649,22 +728,31 @@ scene.add(hero);
 
 // ---------- accessories ----------
 const accMeshes = {};
+const hairMeshes = {};
 function makeWingSet(cfg) {
   const g = new T.Group();
-  const mat = new T.MeshStandardMaterial({ color: cfg.color, emissive: cfg.emissive, emissiveIntensity: cfg.glow ? 0.9 : 0.25, roughness: 0.4, side: T.DoubleSide, transparent: true, opacity: 0.95 });
   const geo = new T.SphereGeometry(0.5, 10, 8);
-  const side = s => {
+  const c1 = new T.Color(cfg.color), c2 = new T.Color(cfg.emissive);
+  const side = sd => {
     const w = new T.Group();
-    w.position.set(s * 0.12, 0.62, -0.22);
-    for (let i = 0; i < cfg.n; i++) {
-      const t = i / (cfg.n - 1);
-      const th = 0.15 + t * cfg.spread;
-      const r = 0.4 + t * 0.06;
-      const f = new T.Mesh(geo, mat);
-      f.position.set(s * Math.cos(th) * r, Math.sin(th) * r, 0);
-      f.scale.set(0.16, 0.95 - t * 0.25, 0.05);
-      f.rotation.z = s > 0 ? th - Math.PI / 2 : Math.PI / 2 - th;
-      w.add(f);
+    w.position.set(sd * 0.12, 0.62, -0.22);
+    for (let layer = 0; layer < 2; layer++) {
+      const n = layer ? cfg.n : cfg.n + 2;
+      for (let i = 0; i < n; i++) {
+        const t = i / (n - 1);
+        const th = 0.1 + t * cfg.spread;
+        const len = layer ? 0.5 - t * 0.12 : 0.85 - t * 0.3;
+        const mat = new T.MeshStandardMaterial({
+          color: c1.clone().lerp(c2, layer ? 0.5 : t * 0.45), emissive: cfg.emissive,
+          emissiveIntensity: cfg.glow ? 0.8 : 0.2, roughness: 0.4, side: T.DoubleSide, transparent: true, opacity: 0.96
+        });
+        const f = new T.Mesh(geo, mat);
+        f.position.set(sd * Math.cos(th) * len * 0.5, Math.sin(th) * len * 0.5, layer ? 0.012 : -0.012);
+        f.scale.set(0.15 - t * 0.03 + layer * 0.03, len, 0.04);
+        f.rotation.z = sd > 0 ? th - Math.PI / 2 : Math.PI / 2 - th;
+        f.userData = { base: f.rotation.z, ph: i * 0.45 + layer, s: sd };
+        w.add(f);
+      }
     }
     return w;
   };
@@ -681,7 +769,7 @@ function makeWingSet(cfg) {
     light.position.set(0, 0.8, 0.5);
     g.add(glow, light);
   }
-  g.userData = { wingL, wingR, glow, light, flap: 0, sparkT: 0 };
+  g.userData = { wingL, wingR, glow, light, flap: 0, sparkT: 0, trail: cfg.glow || cfg.emissive };
   return g;
 }
 
@@ -768,6 +856,20 @@ function buildAccessories() {
   for (const sd of [-1, 1]) add(backpack, box(0.06, 0.5, 0.03), leather, sd * 0.14, 0.4, 0.18);
   accMeshes.backpack = backpack;
 
+  const hm = (g, geo, x, y, z, rx, ry, rz) => add(g, geo, matHair, x, y, z, rx, ry, rz);
+  const hcap = () => new T.SphereGeometry(0.265, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.56);
+  const hShort = new T.Group(); hm(hShort, hcap(), 0, 0.93, -0.01, -0.3); hairMeshes.short = hShort;
+  const hLong = new T.Group(); hm(hLong, hcap(), 0, 0.93, -0.01, -0.3); hm(hLong, box(0.46, 0.5, 0.1), 0, 0.72, -0.2);
+  for (const sd of [-1, 1]) hm(hLong, box(0.08, 0.36, 0.14), sd * 0.24, 0.8, -0.04);
+  hairMeshes.long = hLong;
+  const hMo = new T.Group();
+  for (let i = 0; i < 5; i++) hm(hMo, box(0.07, i === 2 ? 0.24 : 0.17, 0.1), 0, 1.2, -0.17 + i * 0.085);
+  hairMeshes.mohawk = hMo;
+  const hPony = new T.Group(); hm(hPony, hcap(), 0, 0.93, -0.01, -0.3); hm(hPony, sph(0.09), 0, 1.0, -0.28); hm(hPony, new T.ConeGeometry(0.07, 0.34, 8), 0, 0.78, -0.31, Math.PI);
+  hairMeshes.pony = hPony;
+  const hBun = new T.Group(); hm(hBun, hcap(), 0, 0.93, -0.01, -0.3); hm(hBun, sph(0.11), 0, 1.2, -0.04);
+  hairMeshes.bun = hBun;
+  for (const k in hairMeshes) { hairMeshes[k].visible = false; body.add(hairMeshes[k]); }
   for (const id of WINGS) accMeshes[id] = makeWingSet(WING_CFG[id]);
   for (const k in accMeshes) { accMeshes[k].visible = false; body.add(accMeshes[k]); }
 }
@@ -778,9 +880,12 @@ function applyColors() {
   matShirt.color.set(colors.shirt);
   matPants.color.set(colors.pants);
   matSkin.color.set(colors.skin);
+  matHair.color.set(colors.hair);
 }
 function applyAccessories() {
   applyColors();
+  const hatOn = !!equipped.hat;
+  for (const id in hairMeshes) hairMeshes[id].visible = !hatOn && id === hairStyle;
   for (const a of ACC) {
     if (accMeshes[a.id]) accMeshes[a.id].visible = equipped[a.slot] === a.id;
   }
@@ -796,6 +901,9 @@ const puffGeo = new T.SphereGeometry(0.12, 8, 6);
 let platforms = [], coins = [], puffs = [], decor = [];
 let frontier = null, platformCount = 0;
 
+const iceMat = new T.MeshStandardMaterial({ color: 0xcdeeff, roughness: 0.2, transparent: true, opacity: 0.8, emissive: 0x2a6a9a, emissiveIntensity: 0.25 });
+const moundMat = new T.MeshStandardMaterial({ color: 0xf6fbff, roughness: 0.9 });
+const iceGeo = new T.ConeGeometry(0.13, 1, 6), moundGeo = new T.SphereGeometry(1, 10, 6);
 function makePlatform(cz, top, biome, size) {
   const B = BIOME_MATS[biome];
   const mesh = new T.Mesh(boxGeo, B.plat);
@@ -805,9 +913,27 @@ function makePlatform(cz, top, biome, size) {
   const cap = new T.Mesh(boxGeo, B.cap);
   cap.receiveShadow = true;
   scene.add(cap);
-  return { mesh, cap, x: 0, z: cz * CELL, cz, w: size, d: size, top, biome, t: 0 };
+  const deco = new T.Group();
+  const half = size / 2 - 0.35;
+  for (let i = 0, n = 3 + Math.floor(Math.random() * 4); i < n; i++) {
+    const h = rnd(0.35, 1.0);
+    const c = new T.Mesh(iceGeo, iceMat);
+    c.scale.set(rnd(0.7, 1.2), h, rnd(0.7, 1.2));
+    c.rotation.x = Math.PI;
+    c.position.set(rnd(-half, half), -1 - h / 2 + 0.1, rnd(-half, half));
+    deco.add(c);
+  }
+  for (let i = 0; i < 3; i++) {
+    const m = new T.Mesh(moundGeo, moundMat);
+    const r = rnd(0.12, 0.26);
+    m.scale.set(r, r * 0.45, r);
+    m.position.set(rnd(-half, half), 0.1, rnd(-half, half));
+    deco.add(m);
+  }
+  scene.add(deco);
+  return { mesh, cap, deco, x: 0, z: cz * CELL, cz, w: size, d: size, top, biome, t: 0 };
 }
-function removePlatform(p) { scene.remove(p.mesh); scene.remove(p.cap); }
+function removePlatform(p) { scene.remove(p.mesh); scene.remove(p.cap); scene.remove(p.deco); }
 function makeCoin(x, y, z) {
   const mesh = new T.Mesh(coinGeo, coinMat);
   mesh.position.set(x, y, z);
@@ -927,8 +1053,8 @@ function resetWorld() {
 // ---------- input ----------
 const keys = {};
 let stickId = null, stickOX = 0, stickOY = 0, stickX = 0, stickZ = 0;
-const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-if (isTouch) document.body.classList.add('touch');
+const isTouch = !!((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints > 0) || ('ontouchstart' in window));
+const touchOn = () => (settings.touchUi === null || settings.touchUi === undefined) ? isTouch : !!settings.touchUi;
 hintEl.textContent = isTouch
   ? 'Джойстик слева — движение · камера (поворот и наклон) — правая часть экрана · кнопка — прыжок'
   : 'WASD — движение · Q/E, Z/X, колесо или тяни правую часть — камера · Пробел — прыжок · F — способность · V — вид · Esc — меню';
@@ -985,6 +1111,18 @@ jumpBtn.addEventListener('pointerdown', e => { e.stopPropagation(); audioInit();
 jumpBtn.addEventListener('pointerup', () => { jumpHeld = false; });
 jumpBtn.addEventListener('pointercancel', () => { jumpHeld = false; });
 document.getElementById('flyBtn').addEventListener('pointerdown', e => { e.stopPropagation(); audioInit(); useAbility(); });
+const pad = { yaw: 0, pitch: 0 };
+document.querySelectorAll('#camPad [data-pad]').forEach(b => {
+  const parts = b.dataset.pad.split(':');
+  const on = e => { e.preventDefault(); e.stopPropagation(); pad[parts[0]] = Number(parts[1]); };
+  const off = () => { pad[parts[0]] = 0; };
+  b.addEventListener('pointerdown', on);
+  b.addEventListener('pointerup', off);
+  b.addEventListener('pointercancel', off);
+  b.addEventListener('pointerleave', off);
+});
+document.getElementById('padView').addEventListener('click', e => { e.stopPropagation(); toggleView(); });
+document.getElementById('padPause').addEventListener('click', e => { e.stopPropagation(); if (ui === null && playing && !dying) openPause(); });
 
 window.addEventListener('keydown', e => {
   if (e.code === 'Escape') { handleEscape(); return; }
@@ -1001,7 +1139,7 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyV' && !e.repeat) toggleView();
   if (e.code === 'KeyF' && !e.repeat) useAbility();
   if (e.code === 'Space') jumpHeld = true;
-  if (ui === 'shop' || ui === 'pause' || ui === 'register' || ui === 'login' || ui === 'custom' || ui === 'notif' || ui === 'settings' || ui === 'backup' || ui === 'creator') return;
+  if (ui === 'shop' || ui === 'pause' || ui === 'register' || ui === 'login' || ui === 'custom' || ui === 'notif' || ui === 'settings' || ui === 'backup' || ui === 'creator' || ui === 'rewards') return;
   if (e.code === 'Space' && e.target.tagName !== 'BUTTON') {
     if (playing) jumpBuf = 0.15;
     else if (!dying) startGame();
@@ -1075,7 +1213,8 @@ function landOn(p) {
 function update(dt) {
   clockT += dt;
   if (playing) camYaw += ((keys.KeyE ? 1 : 0) - (keys.KeyQ ? 1 : 0)) * dt * 2.2;
-  if (playing) adjustPitch(((keys.KeyX ? 1 : 0) - (keys.KeyZ ? 1 : 0)) * dt * 1.4);
+  if (playing) camYaw += pad.yaw * dt * 2.2;
+  if (playing) adjustPitch((((keys.KeyX ? 1 : 0) - (keys.KeyZ ? 1 : 0)) + pad.pitch) * dt * 1.4);
   const id = wingId();
   if (playing && abilT > 0) {
     abilT -= dt;
@@ -1171,7 +1310,7 @@ function update(dt) {
       if (dx * dx + dy * dy + dz * dz < magR * magR) {
         c.got = true;
         c.popT = 0.25;
-        runCoins++; bank++;
+        runCoins++; bank++; stats.coins++;
         sfx.coin();
         save();
       }
@@ -1194,6 +1333,7 @@ function die() {
   dying = true;
   deathT = 0.3;
   best = Math.max(best, Math.floor(maxH));
+  checkAch();
   save();
   sfx.crash();
   shake = 0.5;
@@ -1301,6 +1441,11 @@ function animateWings(dt, speed, running, wid) {
   d.flap += (target - d.flap) * Math.min(1, dt * rate);
   d.wingL.rotation.z = d.flap;
   d.wingR.rotation.z = -d.flap;
+  for (const w of [d.wingL, d.wingR]) {
+    for (const f of w.children) {
+      if (f.userData.ph !== undefined) f.rotation.z = f.userData.base + f.userData.s * Math.sin(clockT * 5 + f.userData.ph) * 0.06 * (1 + Math.abs(d.flap) * 3);
+    }
+  }
 
   if (d.glow) {
     d.glow.material.opacity = 0.42 + 0.12 * Math.sin(clockT * 2.3) + (flying || dashing ? 0.25 : 0);
@@ -1311,6 +1456,7 @@ function animateWings(dt, speed, running, wid) {
   if (d.sparkT <= 0) {
     if (flying) { d.sparkT = 0.035; puff(px + rnd(-0.9, 0.9), py + 1.4 + rnd(-0.2, 0.5), pz, 1, 0xffe9a8, 0.8); }
     else if (dashing) { d.sparkT = 0.02; puff(px + rnd(-0.6, 0.6), py + 1.0 + rnd(-0.3, 0.3), pz, 1, 0xff7a2a, 0.9); }
+    else if (gliding) { d.sparkT = 0.04; puff(px + rnd(-0.7, 0.7), py + 1.2, pz, 1, d.trail, 0.7); }
     else if (d.glow) { d.sparkT = 0.25; puff(px + rnd(-0.9, 0.9), py + 1.4 + rnd(-0.2, 0.5), pz, 1, 0xfff2c0, 0.8); }
     else { d.sparkT = 1; }
   }
@@ -1337,6 +1483,8 @@ function draw(dt) {
     const capH = 0.14 * e + 0.001;
     p.cap.scale.set(p.w * 0.98, capH, p.d * 0.98);
     p.cap.position.set(p.x, p.top + capH / 2, p.z);
+    p.deco.position.set(p.x, p.top, p.z);
+    p.deco.scale.setScalar(Math.max(0.01, e));
   }
   for (const c of coins) {
     if (c.popT > 0) {
@@ -1384,6 +1532,8 @@ function draw(dt) {
   sun.position.set(px + 4, py + 18, pz + 8);
   sun.target.position.set(px, py, pz);
   abyss.position.set(camX, camY - 24, camZ - 20);
+  mountains.position.set(camX, camY - 60, camZ - 150);
+  moon.position.set(camX - 35, camY + 28, camZ - 140);
 
   const B = BIOMES[targetBiome], BM = BIOME_MATS[targetBiome];
   const k = Math.min(1, dt * 0.8);
@@ -1394,7 +1544,7 @@ function draw(dt) {
   scene.fog.far += (B.fogF - scene.fog.far) * k;
   snowRate += (B.snow - snowRate) * k;
   windNow += (B.wind - windNow) * k;
-  auroraOpacity += ((B.aurora ? 0.28 : 0) - auroraOpacity) * k;
+  auroraOpacity += ((B.aurora ? 0.5 : 0) - auroraOpacity) * k;
   for (let i = 0; i < auroras.length; i++) {
     const a = auroras[i];
     a.material.opacity = auroraOpacity * (0.7 + 0.3 * Math.sin(clockT * 0.7 + i * 2));
@@ -1428,13 +1578,16 @@ function draw(dt) {
 // ---------- UI ----------
 function show(name) {
   ui = name;
-  for (const id of ['register', 'login', 'menu', 'over', 'shop', 'pause', 'custom', 'notif', 'settings', 'backup', 'creator']) {
+  for (const id of ['register', 'login', 'menu', 'over', 'shop', 'pause', 'custom', 'notif', 'settings', 'backup', 'creator', 'rewards']) {
     document.getElementById(id).classList.toggle('hidden', id !== name);
   }
 }
 function renderNotes() {
   const el = document.getElementById('notifBody');
   const lines = [];
+  const dcan = dailyState().can, unc = ACH.filter(a => ach[a.id] === 1).length;
+  if (dcan) lines.push('🎁 Доступна ежедневная награда');
+  if (unc) lines.push('🏆 Награды за достижения ждут: ' + unc);
   const upgOk = UPG.filter(u => upg[u.id] < u.cost.length && bank >= u.cost[upg[u.id]]);
   if (upgOk.length) lines.push('Можно купить улучшения: ' + upgOk.map(u => u.name).join(', '));
   const accOk = ACC.filter(a => !owned.includes(a.id) && (!a.unlockBest || best >= a.unlockBest) && bank >= priceOf(a));
@@ -1455,6 +1608,9 @@ function renderNotes() {
   const badge = document.getElementById('notesBadge');
   const n = (upgOk.length ? 1 : 0) + (accOk.length ? 1 : 0) + (idle.length ? 1 : 0);
   if (badge) badge.textContent = n ? String(n) : '';
+  const rb = document.getElementById('rewBadge');
+  const rn = (dcan ? 1 : 0) + unc;
+  if (rb) rb.textContent = rn ? String(rn) : '';
   if (el) el.innerHTML = lines.length ? lines.map(l => '<div class="note">' + l + '</div>').join('') : '<p>Пока уведомлений нет.</p>';
 }
 function updateMenuStats() {
@@ -1469,6 +1625,76 @@ function showOver() {
   show('over');
 }
 
+const hNow = () => Math.max(best, playing ? Math.floor(maxH || 0) : 0);
+const ACH = [
+  { id: 'h10', name: 'Первые шаги', desc: 'Подняться на 10 м', reward: 5, goal: 10, prog: hNow },
+  { id: 'h25', name: 'Выше облаков', desc: 'Подняться на 25 м', reward: 10, goal: 25, prog: hNow },
+  { id: 'h50', name: 'Альпинист', desc: 'Подняться на 50 м', reward: 20, goal: 50, prog: hNow },
+  { id: 'h100', name: 'Покоритель лестницы', desc: 'Подняться на 100 м', reward: 40, goal: 100, prog: hNow },
+  { id: 'h200', name: 'Легенда высоты', desc: 'Подняться на 200 м', reward: 100, goal: 200, prog: hNow },
+  { id: 'r5', name: 'Привычка', desc: 'Сыграть 5 забегов', reward: 10, goal: 5, prog: () => stats.runs },
+  { id: 'r25', name: 'Завсегдатай', desc: 'Сыграть 25 забегов', reward: 30, goal: 25, prog: () => stats.runs },
+  { id: 'c100', name: 'Копилка', desc: 'Собрать 100 монет', reward: 15, goal: 100, prog: () => stats.coins },
+  { id: 'c500', name: 'Золотая жила', desc: 'Собрать 500 монет', reward: 50, goal: 500, prog: () => stats.coins },
+  { id: 'a3', name: 'Модник', desc: 'Иметь 3 аксессуара', reward: 20, goal: 3, prog: () => owned.length },
+  { id: 'w1', name: 'Крылатый', desc: 'Купить любые крылья', reward: 30, goal: 1, prog: () => owned.some(id => WINGS.includes(id)) ? 1 : 0 }
+];
+const DAILY = [20, 30, 40, 50, 75, 100, 200];
+let achTick = 0, rewTab = 'daily';
+const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const dayNum = k => { const a = k.split('-').map(Number); return Math.floor(Date.UTC(a[0], a[1] - 1, a[2]) / 86400000); };
+function dailyState() {
+  const t = todayKey();
+  if (daily.last === t) return { can: false, streak: daily.streak };
+  const streak = (!daily.last || dayNum(t) - dayNum(daily.last) > 1) ? 0 : daily.streak;
+  return { can: true, streak };
+}
+function claimDaily() {
+  const st = dailyState();
+  if (!st.can) return;
+  const r = DAILY[st.streak % 7];
+  bank += r;
+  daily = { last: todayKey(), streak: st.streak + 1 };
+  save(); sfx.buy();
+  showToast('🎁 Ежедневная награда: +' + r + ' монет');
+  renderRewards(); updateMenuStats();
+}
+function checkAch() {
+  if (!account) return;
+  let any = false;
+  for (const a of ACH) {
+    if (!ach[a.id] && a.prog() >= a.goal) { ach[a.id] = 1; any = true; showToast('🏆 Достижение: ' + a.name); }
+  }
+  if (any) save();
+}
+function claimAch(id) {
+  const a = ACH.find(x => x.id === id);
+  if (!a || ach[id] !== 1) return;
+  ach[id] = 2; bank += a.reward;
+  save(); sfx.buy(); renderRewards(); updateMenuStats();
+}
+function renderRewards() {
+  const el = document.getElementById('rewardsBody');
+  if (!el) return;
+  const st = dailyState();
+  let h = `<div class="tabs"><button class="tab${rewTab === 'daily' ? ' on' : ''}" data-tab="rew|daily">🎁 Ежедневная</button><button class="tab${rewTab === 'ach' ? ' on' : ''}" data-tab="rew|ach">🏆 Достижения</button></div>`;
+  if (rewTab === 'daily') {
+    const cur = st.streak % 7;
+    const upTo = st.can ? cur : ((st.streak - 1) % 7) + 1;
+    h += '<div class="days">' + DAILY.map((r, i) => `<div class="day${st.can && i === cur ? ' now' : ''}${i < upTo ? ' done' : ''}"><span>День ${i + 1}</span><b>${r}</b></div>`).join('') + '</div>';
+    h += `<p style="text-align:center">Серия: ${st.streak} дн. Заходите каждый день, чтобы награда росла.</p>`;
+    h += `<button class="btn play" data-act="claimDaily"${st.can ? '' : ' disabled'}>${st.can ? 'Забрать ' + DAILY[cur] + ' монет' : 'Приходите завтра'}</button>`;
+  } else {
+    for (const a of ACH) {
+      const v = Math.min(a.goal, a.prog()), st2 = ach[a.id] || 0;
+      const btn = st2 === 2 ? '<button class="btn" disabled>Получено</button>'
+        : st2 === 1 ? `<button class="btn" data-claim="${a.id}">+${a.reward} <span class="coin"></span></button>`
+        : `<button class="btn" disabled>${a.reward} <span class="coin"></span></button>`;
+      h += `<div class="item" style="--rc:${st2 ? '#ffcf4a' : '#9fb3cc'}"><div class="ico">${st2 === 2 ? '✅' : '🏆'}</div><div class="meta"><b>${a.name}</b><small>${a.desc}</small><div class="bar${v >= a.goal ? ' full' : ''}"><i style="width:${v / a.goal * 100}%"></i></div><small>${v} / ${a.goal}</small></div>${btn}</div>`;
+    }
+  }
+  el.innerHTML = h;
+}
 let shopTab = 'upg', customTab = 'col';
 const UPG_ICON = { jump: '🦘', speed: '⚡', magnet: '🧲', shield: '🛡' };
 const SLOT_ICON = { hat: '🎩', face: '👓', neck: '🧣', back: '🎒' };
@@ -1563,9 +1789,10 @@ function equipAcc(id) {
 const PALETTES = {
   shirt: ['#4ab8ff', '#ff5566', '#5ee08a', '#ffd34d', '#b56cff', '#ff9a4a', '#f4f4f4', '#2a2f3a'],
   pants: ['#223355', '#2a2f3a', '#5a3d2b', '#3d6b4a', '#6b2a3a', '#8a95a6'],
-  skin:  ['#ffd7a8', '#f1c27d', '#e0a070', '#c68642', '#8d5524', '#5a3a22']
+  skin:  ['#ffd7a8', '#f1c27d', '#e0a070', '#c68642', '#8d5524', '#5a3a22'],
+  hair: ['#4a2f1b', '#1b1b1b', '#c9a227', '#b5651d', '#d9d9e3', '#d7263d', '#4fb6ff']
 };
-const PART_NAME = { shirt: 'Футболка', pants: 'Штаны', skin: 'Кожа' };
+const PART_NAME = { shirt: 'Футболка', pants: 'Штаны', skin: 'Кожа', hair: 'Волосы' };
 function colorRows() {
   let h = '';
   for (const part in PALETTES) {
@@ -1575,7 +1802,16 @@ function colorRows() {
     }
     h += '</div></div>';
   }
+  h += '<div class="crow"><b>Причёска</b><div class="opts">' + HAIR_STYLES.map(x => `<button class="opt${hairStyle === x[0] ? ' on' : ''}" data-hair="${x[0]}">${x[1]}</button>`).join('') + '</div></div>';
   return h;
+}
+function setHair(id) {
+  if (!HAIR_STYLES.some(x => x[0] === id)) return;
+  hairStyle = id;
+  applyAccessories();
+  save();
+  renderCustom();
+  renderCreator();
 }
 function renderCustom() {
   const el = document.getElementById('customBody');
@@ -1645,6 +1881,8 @@ function act(name) {
   if (name === 'backup') { backupFrom = ui || 'menu'; document.getElementById('backupText').value = ''; backupMsg('', true); show('backup'); return; }
   if (name === 'backupBack') { show(backupFrom); return; }
   if (name === 'creatorDone') { created = true; save(); startGame(); return; }
+  if (name === 'rewards') { shopFrom = ui || 'menu'; renderRewards(); show('rewards'); return; }
+  if (name === 'claimDaily') { claimDaily(); return; }
   if (name === 'backupExport') {
     const c = exportCode();
     if (!c) { backupMsg('Сначала войдите в аккаунт', false); return; }
@@ -1674,10 +1912,12 @@ function startGame() {
   playing = true; dying = false; deathT = 0; paused = false;
   stickX = 0; stickZ = 0; stickId = null;
   stickEl.style.display = 'none';
+  stats.runs++;
   resetWorld();
   show(null);
 }
 function openPause() {
+  pad.yaw = 0; pad.pitch = 0;
   document.getElementById('pauseH').textContent = Math.floor(maxH) + ' м';
   document.getElementById('pauseC').innerHTML = '<span class="coin"></span> ' + runCoins;
   paused = true;
@@ -1703,7 +1943,7 @@ function exitToMenu() {
 }
 function handleEscape() {
   if (ui === 'backup') show(backupFrom);
-  else if (ui === 'shop' || ui === 'custom' || ui === 'notif' || ui === 'settings') show(shopFrom);
+  else if (ui === 'shop' || ui === 'custom' || ui === 'notif' || ui === 'settings' || ui === 'rewards') show(shopFrom);
   else if (ui === 'pause') resumeGame();
   else if (ui === null && playing && !dying) openPause();
 }
@@ -1722,10 +1962,14 @@ document.addEventListener('click', e => {
   if (ab && !ab.disabled) return buyAcc(ab.dataset.accBuy);
   const ae = e.target.closest('[data-acc-equip]');
   if (ae) return equipAcc(ae.dataset.accEquip);
+  const cl = e.target.closest('[data-claim]');
+  if (cl) return claimAch(cl.dataset.claim);
+  const hr = e.target.closest('[data-hair]');
+  if (hr) return setHair(hr.dataset.hair);
   const tb = e.target.closest('[data-tab]');
   if (tb) {
     const [w, t] = tb.dataset.tab.split('|');
-    if (w === 'shop') { shopTab = t; renderShop(); } else { customTab = t; renderCustom(); }
+    if (w === 'shop') { shopTab = t; renderShop(); } else if (w === 'rew') { rewTab = t; renderRewards(); } else { customTab = t; renderCustom(); }
     return;
   }
   const cs = e.target.closest('[data-col]');
@@ -1773,6 +2017,7 @@ function importCode(text) {
     const c = d.colors && d.colors[part];
     data.colors[part] = (typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c)) ? c : DEFAULT_COLORS[part];
   }
+  data.hairStyle = d.hairStyle; data.daily = d.daily; data.ach = d.ach; data.stats = d.stats; data.created = d.created;
   const name = a.name.slice(0, 16);
   const k = userKey(name);
   db.users[k] = { account: { name, salt: a.salt, hash: a.hash }, data };
@@ -1831,7 +2076,7 @@ muteBtn.addEventListener('click', e => {
   e.stopPropagation();
   audioInit();
   muted = !muted;
-  master.gain.value = muted ? 0 : settings.volume / 100 * 0.6;
+  if (master) master.gain.value = muted ? 0 : settings.volume / 100 * 0.6;
   muteBtn.innerHTML = muted ? ICON_MUTED : ICON_SPEAKER;
 });
 
@@ -1839,12 +2084,14 @@ muteBtn.addEventListener('click', e => {
 let actx = null, master = null;
 function audioInit() {
   if (!actx) {
-    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    actx = new AC();
     master = actx.createGain();
     master.gain.value = muted ? 0 : settings.volume / 100 * 0.6;
     master.connect(actx.destination);
   }
-  if (actx.state === 'suspended') actx.resume();
+  if (actx && actx.state === 'suspended') actx.resume();
 }
 function tone(freq, dur, type, vol, slideTo, delay) {
   if (!actx) return;
@@ -1873,6 +2120,8 @@ function frame(now) {
   const dt = Math.min(0.033, (now - last) / 1000);
   last = now;
   if (!paused) update(dt);
+  achTick += dt;
+  if (achTick > 1) { achTick = 0; checkAch(); }
   if (dying) {
     deathT -= dt;
     if (deathT <= 0) { dying = false; showOver(); }
@@ -1893,10 +2142,11 @@ function frame(now) {
     if (passive) fh.textContent = ABIL_NAME[wid];
     else if (abilT > 0) fh.textContent = `${ABIL_NAME[wid]}: ${Math.ceil(abilT)} с`;
     else if (abilCd > 0) fh.textContent = `Перезарядка: ${Math.ceil(abilCd)} с`;
-    else fh.textContent = `${ABIL_NAME[wid]} готов (F)`;
+    else fh.textContent = `${ABIL_NAME[wid]} готов${touchOn() ? '' : ' (F)'}`;
   } else {
     fh.textContent = '';
   }
+  document.body.classList.toggle('play', playing && !paused);
   draw(dt);
   requestAnimationFrame(frame);
 }
